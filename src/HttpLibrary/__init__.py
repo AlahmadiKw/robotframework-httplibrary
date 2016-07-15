@@ -14,6 +14,8 @@ def load_json(json_string):
     try:
         return json.loads(json_string)
     except ValueError, e:
+        if isinstance(json_string, basestring):
+            return json_string
         raise ValueError("Could not parse '%s' as JSON: %s" % (json_string, e))
 
 
