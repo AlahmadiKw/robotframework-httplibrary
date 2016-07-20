@@ -14,8 +14,6 @@ def load_json(json_string):
     try:
         return json.loads(json_string)
     except ValueError, e:
-        if isinstance(json_string, basestring):
-            return json_string
         raise ValueError("Could not parse '%s' as JSON: %s" % (json_string, e))
 
 
@@ -623,10 +621,18 @@ class HTTP:
         | ${result}=       | Set Json Value | {"foo": {"bar": [1,2,3]}} | /foo | 12 |
         | Should Be Equal  | ${result}      | {"foo": 12}               |      |    |
         """
+        try:
+            loaded_json = load_json(json_value)
+        except ValueError, e:
+            if isinstance(json_value, basestring):
+                loaded_json = json_value
+            else:
+                raise ValueError("Could not parse '%s' as JSON: %s" % (json_value, e))
+
         return jsonpatch.apply_patch(json_string, [{
                                                    'op': 'add',
                                                    'path': json_pointer,
-                                                   'value': load_json(json_value)
+                                                   'value': loaded_json
                                                    }])
 
     @_with_json
